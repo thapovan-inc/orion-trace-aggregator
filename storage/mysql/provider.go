@@ -54,6 +54,9 @@ func (p *MySqlProvider) UpsertTraceEntry(trace *common.Trace) error {
 		lstSeen := time.Unix(int64(trace.LastSeen/time.Second), int64(trace.LastSeen%time.Second))
 		lastSeen = &lstSeen
 		traceEnded = 1
+	} else {
+		lstSeen := time.Now()
+		lastSeen = &lstSeen
 	}
 	retriesLeft := 5
 tryUpsert:
