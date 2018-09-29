@@ -1,0 +1,32 @@
+[general]
+  namespace = "default"
+  event_batch_size = 8192
+  write_async = false
+[book_keeper]
+  type = "disk"
+[event_source]
+  type = "nats"
+  [event_source.nats]
+    url = "nats://127.0.0.1:4222"
+    client_id = "orion-trace-aggregator"
+    group_id = "orion-trace-aggreagtor-default"
+    cluster_id = "orion-cluster"
+  [event_source.kafka]
+    "bootstrap.servers" = "localhost:29092"
+    "group.id" = "orion-trace-aggreagtor-default"
+    "auto.offset.reset" = "earliest"
+    "go.events.channel.enable" = false
+    "go.application.rebalance.enable" = true
+[storage]
+  type = "mysql"
+  [storage.mysql]
+    user = "root"
+    passwd = "root"
+    net = "tcp"
+    addr = "localhost:3306"
+    rejectReadOnly = true
+    dbName = "orion-namespace-default"
+[log]
+  level = "info" # Valid levels are debug, info, warn, error, panic. Defaults to info
+  format = "text" # Can be "text" or "json". Defaults to "text"
+  use_colors = true # Considered only when using "text" log format. Defaults to false

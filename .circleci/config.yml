@@ -1,0 +1,48 @@
+version: 2.0
+
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.11-stretch
+    working_directory: ~/orion-trace-aggregator
+    environment:
+      GOOS: linux
+      GOARCH: amd64
+      CGO_ENABLED: 0
+    steps:
+    - checkout
+    - run: sudo apt update && sudo apt install -y librdkafka-dev
+    - run: go mod download
+    - save_cache:
+        key: orion-trace-aggregator-{{ arch }}-{{ .Branch }}
+        paths:
+          - ./vendor
+        when: on_success
+    - run: go build -tags static -v -a -installsuffix cgo
+    - persist_to_workspace:
+        root: ~/orion-trace-aggregator
+        paths:
+          - orion-trace-aggregator
+          - Dockerfile
+          - default.toml
+  push-image:
+    docker:
+    - image: circleci/golang:1.11-stretch
+    working_directory: ~/orion-trace-aggregator
+    steps:
+    - setup_remote_docker
+    - attach_workspace:
+        at: ~/orion-trace-aggregator
+    - run: |
+        docker build -t thapovan/orion-trace-aggregator:latest .
+        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+        docker push thapovan/orion-trace-aggregator:latest
+        rm ~/.docker/config.json
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - push-image:
+          requires:
+            - build
