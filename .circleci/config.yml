@@ -11,7 +11,7 @@ jobs:
       CGO_ENABLED: 0
     steps:
     - checkout
-    - run: go build -tags static -v -a -installsuffix cgo
+    - run: go build -tags static -v -a -n -ldflags "-linkmode external -extldflags -static"
     - persist_to_workspace:
         root: ~/orion-trace-aggregator
         paths:
