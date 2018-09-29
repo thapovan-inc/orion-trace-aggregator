@@ -8,10 +8,7 @@ import (
 	"github.com/thapovan-inc/orion-trace-aggregator/storage"
 	"github.com/thapovan-inc/orion-trace-aggregator/util"
 	"go.uber.org/zap"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 )
 
 func main() {
@@ -55,15 +52,15 @@ func main() {
 	}()
 	wg.Wait()
 	defer bookkeeper.Cleanup()
-	sigs := make(chan os.Signal, 1)
+	//sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		sig := <-sigs
-		logger.Info("Received signal. Exiting now", zap.String("signal", sig.String()))
-		spanDataConsumer.GetControlPID().Tell("sig_close")
-		actorPID.Poison()
-		done <- true
-	}()
+	//signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	//go func() {
+	//	sig := <-sigs
+	//	logger.Info("Received signal. Exiting now", zap.String("signal", sig.String()))
+	//	spanDataConsumer.GetControlPID().Tell("sig_close")
+	//	actorPID.Poison()
+	//	done <- true
+	//}()
 	<-done
 }

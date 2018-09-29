@@ -3,7 +3,7 @@ version: 2.0
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.11-stretch
     working_directory: ~/orion-trace-aggregator
     environment:
       GOOS: linux
@@ -11,7 +11,8 @@ jobs:
       CGO_ENABLED: 0
     steps:
     - checkout
-    - run: go build -tags static -v -a -n -ldflags "-linkmode external -extldflags -static"
+    - run: sudo apt update && sudo apt install -y librdkafka-dev
+    - run: go build
     - persist_to_workspace:
         root: ~/orion-trace-aggregator
         paths:
