@@ -3,7 +3,7 @@ version: 2.0
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.11-stretch
+      - image: circleci/golang:1.11
     working_directory: ~/orion-trace-aggregator
     environment:
       GOOS: linux
