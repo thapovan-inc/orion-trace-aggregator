@@ -42,10 +42,24 @@ func (ta *traceEventAggregator) upsertTrace(traceID []byte, eventType common.Eve
 	}
 	if eventType == common.START_SPAN && !ta.bookKeeper.TraceStarted(traceID) {
 		signal := jsoniter.Get([]byte(metadata), "orion", "signal").ToString()
+		if signal == "" {
+			signal = jsoniter.Get([]byte(metadata), "orion.signal").ToString()
+		}
 		if signal == "START_TRACE" {
 			trace.FirstSeen = time.Duration(spanData.Timestamp * 1000)
+			ta.bookKeeper.MarkTraceStarted(traceID)
 		}
-		ta.bookKeeper.TraceStarted(traceID)
+	} else if eventType == common.END_SPAN && !ta.bookKeeper.TraceEnded(traceID) {
+		signal := jsoniter.Get([]byte(metadata), "orion", "signal").ToString()
+		if signal == "" {
+			signal = jsoniter.Get([]byte(metadata), "orion.signal").ToString()
+		}
+		if signal == "END_TRACE" {
+			trace.LastSeen = time.Duration(spanData.Timestamp * 1000)
+			ta.bookKeeper.MarkTraceEnded(traceID)
+		} else {
+			return
+		}
 	} else if ta.bookKeeper.TraceSeenBefore(traceID) {
 		return
 	} else {

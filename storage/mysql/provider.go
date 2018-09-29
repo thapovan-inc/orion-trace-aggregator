@@ -21,7 +21,7 @@ const (
 )
 
 const (
-	sp_UPSERT_TRACE         = "call upsert_trace (?,?,?)"
+	sp_UPSERT_TRACE         = "call upsert_trace (?,?,?,?,?)"
 	sp_UPSERT_SPAN          = "call upsert_span(?,?,?,?,?,?,?)"
 	sp_INSERT_EVENT         = "call insert_event(?,?,?,?,?,?,?,?)"
 	sp_SET_TAG              = "call set_tag(?,?,?,?)"
@@ -41,7 +41,8 @@ func (p *MySqlProvider) UpsertTraceEntry(trace *common.Trace) error {
 		logger.Error("Unable to prepare statement", zap.Error(err))
 		return err
 	}
-	var firstSeen *time.Time
+	var firstSeen, lastSeen *time.Time
+	var traceEnded int
 	if trace.FirstSeen > 0 {
 		fstSeen := time.Unix(int64(trace.FirstSeen/time.Second), int64(trace.FirstSeen%time.Second))
 		firstSeen = &fstSeen
@@ -49,9 +50,14 @@ func (p *MySqlProvider) UpsertTraceEntry(trace *common.Trace) error {
 		fstSeen := time.Now()
 		firstSeen = &fstSeen
 	}
+	if trace.LastSeen > 0 {
+		lstSeen := time.Unix(int64(trace.LastSeen/time.Second), int64(trace.LastSeen%time.Second))
+		lastSeen = &lstSeen
+		traceEnded = 1
+	}
 	retriesLeft := 5
 tryUpsert:
-	result, err := stmt.Exec(trace.TraceID, trace.Name, firstSeen)
+	result, err := stmt.Exec(trace.TraceID, trace.Name, firstSeen, lastSeen, traceEnded)
 	if err != nil {
 		if mysqlError, isMySQLError := err.(*mysql.MySQLError); isMySQLError {
 			if mysqlError.Number == 1213 && retriesLeft > 0 {

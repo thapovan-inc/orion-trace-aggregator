@@ -213,12 +213,12 @@ func (b *badgerBK) MarkTraceEnded(traceID []byte) {
 
 func (b *badgerBK) wasSeenBefore(txn *badger.Txn, key []byte) (bool, error) {
 	wasSeen := false
-	item, err := txn.Get(key)
-	if item != nil {
+	_, err := txn.Get(key)
+	if err == nil {
 		wasSeen = true
-		err = nil
 	}
 	if err == badger.ErrKeyNotFound {
+		wasSeen = false
 		err = nil
 	}
 	return wasSeen, err

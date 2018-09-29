@@ -19,6 +19,7 @@ type Trace struct {
 	TraceID   []byte
 	Name      string
 	FirstSeen time.Duration
+	LastSeen  time.Duration
 }
 
 type Span struct {
