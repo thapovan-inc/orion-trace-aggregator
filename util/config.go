@@ -3,7 +3,6 @@ package util
 import (
 	"fmt"
 	"github.com/BurntSushi/toml"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/go-sql-driver/mysql"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -33,12 +32,6 @@ type LoggerConfig struct {
 	Level     string `toml:"level"`
 	Format    string `toml:"format"`
 	UseColors bool   `toml:"use_colors"`
-}
-
-type EventSource struct {
-	Type                string          `toml:"type"`
-	NatsConsumerConfig  NatsConfig      `toml:"nats"`
-	KafkaConsumerConfig kafka.ConfigMap `toml:"kafka"`
 }
 
 type NatsConfig struct {

@@ -12,7 +12,13 @@ jobs:
     steps:
     - checkout
     - run: sudo apt update && sudo apt install -y librdkafka-dev
-    - run: go build
+    - run: go mod download
+    - save_cache:
+        key: orion-trace-aggregator-{{ arch }}-{{ .Branch }}
+        paths:
+          - ./vendor
+        when: on_success
+    - run: go build -tags static -v -a -installsuffix cgo
     - persist_to_workspace:
         root: ~/orion-trace-aggregator
         paths:
